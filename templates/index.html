@@ -3,236 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COVID-19 Data Assistant</title>
+    <title>COVID-19 Assistant</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.18.0/plotly.min.js"></script>
     <style>
-        body { 
-            background-color: #f8f9fa; 
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            height: 100vh;
             margin: 0;
-            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .chat-container { 
-            height: calc(100vh - 200px); 
-            overflow-y: auto; 
-            background: white; 
-            padding: 15px;
+        
+        .chat-container {
+            width: 750px;
+            height: 750px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-        .chat-message { 
-            margin-bottom: 20px; 
-            padding: 15px; 
-            border-radius: 8px; 
-        }
-        .question { 
-            background-color: #e3f2fd; 
-            border-left: 4px solid #2196F3; 
-        }
-        .answer-section { 
-            background-color: #f1f8e9; 
-            border-left: 4px solid #4CAF50; 
-        }
-        .error { 
-            background-color: #ffebee; 
-            border-left: 4px solid #f44336; 
-        }
-        .explanation { 
-            padding: 15px; 
-            background: #fff3e0; 
-            border-radius: 8px; 
-            margin-top: 10px;
-            border-left: 4px solid #FF9800;
-        }
-        .single-value {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #2196F3;
+        
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             padding: 20px;
             text-align: center;
         }
-        .table { 
-            font-size: 0.9em; 
-            margin-top: 10px; 
+        
+        .chat-header h3 {
+            margin: 0;
+            font-weight: 600;
         }
-        .chart-container { 
-            margin-top: 15px; 
-            min-height: 300px; 
+        
+        .chat-header small {
+            opacity: 0.9;
         }
-        .section-title {
-            font-weight: bold;
-            color: #555;
-            margin-bottom: 10px;
-            font-size: 0.9em;
-            text-transform: uppercase;
-        }
-        .header {
-            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-            color: white;
+        
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
             padding: 20px;
+            background: #f8f9fa;
         }
-        .input-section {
-            background: white;
-            padding: 15px;
-            border-top: 2px solid #dee2e6;
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            animation: fadeIn 0.3s ease-in;
         }
-        .quick-questions {
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            line-height: 1.5;
+        }
+        
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.bot .message-bubble {
             background: white;
-            padding: 15px;
-            margin: 10px;
-            border-radius: 8px;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 12px 18px;
+            background: white;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            background: #667eea;
+            display: inline-block;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .input-group input {
+            border-radius: 25px;
+            border: 2px solid #e0e0e0;
+            padding: 12px 20px;
+        }
+        
+        .input-group input:focus {
+            border-color: #667eea;
+            box-shadow: none;
+        }
+        
+        .input-group button {
+            border-radius: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+        
+        .suggestions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .suggestion-chip {
+            background: #f0f0f0;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .suggestion-chip:hover {
+            background: #667eea;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <h4 class="mb-0">🦠 COVID-19 Data Assistant</h4>
-        <small>Ask me anything about global COVID-19 statistics from Worldometer</small>
-    </div>
-
-    <!-- Quick Questions -->
-    <div class="quick-questions">
-        <div class="row g-2">
-            <div class="col-6">
-                <button class="btn btn-outline-danger btn-sm w-100" onclick="askQuick('Country with most cases')">
-                    📊 Most Cases
+    <div class="chat-container">
+        <div class="chat-header">
+            <h3>🦠 COVID-19 Assistant</h3>
+            <small>Ask me anything about global COVID-19 statistics</small>
+        </div>
+        
+        <div class="messages-container" id="messages">
+            <div class="message bot">
+                <div class="message-bubble">
+                    Hi! I'm your COVID-19 data assistant. I can help you understand global COVID-19 statistics, compare countries, analyze trends, and answer your questions about the pandemic data. What would you like to know?
+                </div>
+            </div>
+        </div>
+        
+        <div class="typing-indicator" id="typing">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        
+        <div class="input-container">
+            <div class="suggestions">
+                <button class="suggestion-chip" onclick="sendSuggestion('Which country has the most cases?')">
+                    Most cases?
+                </button>
+                <button class="suggestion-chip" onclick="sendSuggestion('Compare USA and India')">
+                    Compare countries
+                </button>
+                <button class="suggestion-chip" onclick="sendSuggestion('Tell me about Asia')">
+                    About Asia
+                </button>
+                <button class="suggestion-chip" onclick="sendSuggestion('Global death toll')">
+                    Global stats
                 </button>
             </div>
-            <div class="col-6">
-                <button class="btn btn-outline-danger btn-sm w-100" onclick="askQuick('Top 10 countries by deaths')">
-                    ☠️ Top Deaths
-                </button>
-            </div>
-            <div class="col-6">
-                <button class="btn btn-outline-danger btn-sm w-100" onclick="askQuick('Total cases by continent')">
-                    🌍 Cases by Continent
-                </button>
-            </div>
-            <div class="col-6">
-                <button class="btn btn-outline-danger btn-sm w-100" onclick="askQuick('Countries with most tests per million')">
-                    🧪 Testing Leaders
+            
+            <div class="input-group mt-3">
+                <input type="text" 
+                       class="form-control" 
+                       id="messageInput" 
+                       placeholder="Ask me anything..." 
+                       onkeypress="handleEnter(event)">
+                <button class="btn btn-primary" onclick="sendMessage()">
+                    Send
                 </button>
             </div>
         </div>
     </div>
-
-    <!-- Chat Container -->
-    <div id="chat-container" class="chat-container">
-        <div class="text-center text-muted p-4">
-            <p>👋 Welcome! I'll help you analyze global COVID-19 data with tables, charts, and insights.</p>
-            <small>Try asking: "Which continent has highest death rate?" or "Compare USA and Brazil cases"</small>
-        </div>
-    </div>
-
-    <!-- Input Section -->
-    <div class="input-section">
-        <div class="input-group">
-            <input type="text" id="questionInput" class="form-control" 
-                   placeholder="Ask about COVID-19 data..." 
-                   onkeypress="handleEnter(event)">
-            <button class="btn btn-danger" onclick="askQuestion()">
-                Ask
-            </button>
-        </div>
-    </div>
-
+    
     <script>
         function handleEnter(event) {
             if (event.key === 'Enter') {
-                askQuestion();
+                sendMessage();
             }
         }
-
-        function askQuick(question) {
-            document.getElementById('questionInput').value = question;
-            askQuestion();
+        
+        function sendSuggestion(text) {
+            document.getElementById('messageInput').value = text;
+            sendMessage();
         }
-
-        function askQuestion() {
-            const input = document.getElementById('questionInput');
-            const question = input.value.trim();
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
             
-            if (!question) return;
-
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, 'user');
             input.value = '';
-            addMessage('question', `<strong>Question:</strong> ${question}`);
             
-            const loadingId = addMessage('loading', '🤖 Analyzing COVID-19 data...');
-
-            fetch('/ask', {
+            // Show typing indicator
+            const typing = document.getElementById('typing');
+            typing.style.display = 'block';
+            
+            // Scroll to bottom
+            scrollToBottom();
+            
+            // Send to backend
+            fetch('/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({question: question})
+                body: JSON.stringify({message: message})
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById(loadingId).remove();
+                typing.style.display = 'none';
                 
                 if (data.success) {
-                    displayResults(data);
+                    addMessage(data.message, 'bot');
                 } else {
-                    addMessage('error', `<strong>Error:</strong> ${data.error}`);
+                    addMessage('Sorry, I encountered an error. Please try again.', 'bot');
                 }
                 
-                const container = document.getElementById('chat-container');
-                container.scrollTop = container.scrollHeight;
+                scrollToBottom();
             })
             .catch(error => {
-                document.getElementById(loadingId).remove();
-                addMessage('error', `Connection error: ${error}`);
+                typing.style.display = 'none';
+                addMessage('Connection error. Please check your internet.', 'bot');
+                scrollToBottom();
             });
         }
-
-        function displayResults(data) {
-            const container = document.getElementById('chat-container');
-            const resultDiv = document.createElement('div');
-            resultDiv.className = 'chat-message answer-section';
+        
+        function addMessage(text, sender) {
+            const container = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
             
-            let content = '<div class="section-title">📊 Results</div>';
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = text;
             
-            // Add table
-            content += data.table;
-            
-            // Add chart if available
-            if (data.chart) {
-                const chartId = 'chart_' + Date.now();
-                content += `<div class="chart-container" id="${chartId}"></div>`;
-            }
-            
-            // Add explanation
-            if (data.explanation) {
-                content += `<div class="explanation">
-                    <div class="section-title">💡 Insights</div>
-                    ${data.explanation}
-                </div>`;
-            }
-            
-            resultDiv.innerHTML = content;
-            container.appendChild(resultDiv);
-            
-            // Render chart if available
-            if (data.chart) {
-                const chartId = resultDiv.querySelector('.chart-container').id;
-                const chartData = JSON.parse(data.chart);
-                Plotly.newPlot(chartId, chartData.data, chartData.layout, {responsive: true});
-            }
-            
-            container.scrollTop = container.scrollHeight;
+            messageDiv.appendChild(bubble);
+            container.appendChild(messageDiv);
         }
-
-        function addMessage(type, content) {
-            const container = document.getElementById('chat-container');
-            const messageId = 'msg_' + Date.now();
-            const div = document.createElement('div');
-            div.id = messageId;
-            div.className = `chat-message ${type}`;
-            div.innerHTML = content;
-            container.appendChild(div);
-            
+        
+        function scrollToBottom() {
+            const container = document.getElementById('messages');
             container.scrollTop = container.scrollHeight;
-            
-            return messageId;
         }
     </script>
 </body>
